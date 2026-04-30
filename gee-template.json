@@ -1,0 +1,18 @@
+{
+  "exportedAt": "2026-04-28T00:00:00.000Z",
+  "source": "Google Earth Engine - Deka Indices Dashboard",
+  "region": "Deka River Catchment",
+  "indices": {
+    "NDVI": { "value": 0 },
+    "NDWI": { "value": 0 },
+    "EVI": { "value": 0 },
+    "NDMI": { "value": 0 },
+    "AMDI": { "value": 0 },
+    "NDSI": { "value": 0 },
+    "heavy_metals": { "value": 0 },
+    "aluminium": { "value": 0 },
+    "LST": { "value": 0 },
+    "precipitation": { "value": 0 },
+    "evapotranspiration": { "value": 0 }
+  }
+}

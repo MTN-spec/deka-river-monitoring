@@ -1,0 +1,50 @@
+# Deka River Environmental Monitoring Platform
+## System Architecture & Methodology
+
+This document outlines the core methodology behind the 8-Layer Hybrid Intelligence Model developed for the Deka River monitoring system. The model is designed to fuse sparse in-situ data, continuous Google Earth Engine (GEE) spectral indices, and physical hydrological principles into a single, highly accurate Water Quality Index (WQI).
+
+### The 8-Layer Hybrid Engine
+
+The system processes incoming data through eight distinct analytical layers before outputting a final confidence-scored WQI.
+
+#### Layer 1: Physics Engine (Deterministic)
+The foundation of the model relies on established environmental physics to simulate water and pollutant dynamics:
+- **SCS-CN Runoff Simulation**: Calculates surface runoff depth based on precipitation, land cover, and soil hydrologic groups.
+- **USLE Sediment Yield**: Estimates soil erosion and sediment transport (proxy for turbidity and heavy metal transport) using rainfall erosivity, soil erodibility, slope length/steepness, and conservation practices.
+- **Streeter-Phelps BOD/DO Sag**: Models the dissolved oxygen (DO) deficit downstream of a pollution source (like a mining discharge) by balancing the deoxygenation rate of biochemical oxygen demand (BOD) against the reaeration rate of the river.
+- **Advection-Dispersion (1D)**: Simulates how heavy metals and Acid Mine Drainage (AMD) spread through the river reach over time, incorporating velocity and longitudinal dispersion coefficients.
+- **First-Order Decay**: Applies standard exponential decay to non-conservative pollutants.
+
+#### Layer 2: Machine Learning Classifiers (Ensemble)
+Three parallel ML models evaluate the incoming feature vector to generate an initial data-driven WQI prediction:
+1. **Random Forest**: A 50-tree ensemble that averages predictions to prevent overfitting, particularly useful for non-linear relationships between spectral indices and heavy metal concentrations.
+2. **Gradient Boosted Trees (GBT)**: A 100-round sequential boosting algorithm that minimizes residual errors, highly sensitive to sudden spikes in AMD signatures.
+3. **K-Nearest Neighbors (KNN)**: Evaluates the current river state against the $k=5$ most similar historical states in the feature space.
+
+#### Layer 3: Deep Learning (Feature Extraction & Sequence)
+This layer captures complex spatial patterns and temporal dependencies:
+- **1D Convolutional Neural Network (CNN)**: Acts as a spectral feature extractor. It convolves a kernel across the 18-band GEE spectral input (NDVI, NDWI, AMDI, Iron Oxide, etc.) to identify hidden correlations that traditional linear algorithms miss.
+- **Long Short-Term Memory (LSTM)**: A 32-hidden-unit recurrent network. It takes the sequence of past states (rolling window) and uses its forget, input, and output gates to predict the evolution of water quality, capturing long-term seasonal trends and short-term shock events.
+
+#### Layer 4: Time-Series Forecasting
+Statistical forecasting techniques run in parallel to the Deep Learning layer:
+- **ARIMA (1,1,1)**: Auto-Regressive Integrated Moving Average models the stationary components of the water quality time series.
+- **Holt-Winters Triple Exponential Smoothing**: Specifically captures the wet/dry seasonal variations inherent to the Matabeleland North climate.
+- **STL Decomposition**: Separates the signal into Seasonal, Trend, and Residual components for anomaly baseline comparison.
+
+#### Layer 5: Anomaly Detection (Compliance Layer)
+This layer is hard-wired to Zimbabwe's Environmental Management Agency (EMA) SI 6 of 2007 effluent standards.
+- **Isolation Forest**: Isolates anomalous feature combinations (e.g., normal pH but highly elevated iron sulfate).
+- **CUSUM (Cumulative Sum)**: Detects subtle, sustained shifts in the mean water quality, such as a slow, continuous leak from a mining tailing dam.
+- **EMA Traffic Light Logic**: Flags specific parameter violations with Critical (Red), Warning (Yellow), or Compliant (Green) status.
+
+#### Layer 6: Bayesian Data Fusion
+Fuses the physics predictions with the data-driven predictions:
+- Utilizes Gaussian conjugate prior-likelihood inference. The historical distribution acts as the prior, and the current sensor/satellite reading acts as the likelihood. The resulting posterior distribution provides a robust WQI estimate that is resilient to sensor failure or cloud cover obscuring satellite data.
+
+#### Layer 7: Stacking Meta-Learner
+The final decision layer.
+- An adaptive meta-regressor takes the outputs of layers 1-6 as its inputs. It assigns dynamic weights to each layer based on recent accuracy, outputting the final composite WQI score and a 95% Confidence Interval.
+
+#### Layer 8: Orchestration & UI Binding
+- The API layer that packages the WQI, Forecasts (30-day and 90-day), EMA alerts, and model agreement percentages, pushing them via WebSocket/Event callbacks to the React/Vanilla-JS dashboard UI.

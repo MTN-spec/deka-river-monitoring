@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deka River | Environmental Monitoring Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="auth.js"></script>
+    <script>checkAuth();</script>
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i data-lucide="droplets" class="logo-icon"></i>
+                <span class="logo-text">DEKA<span>River</span></span>
+            </div>
+            <div class="nav-items">
+                <div class="nav-item active" title="Dashboard" data-view="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                </div>
+                <div class="nav-item" title="Indices" data-view="indices">
+                    <i data-lucide="layers"></i>
+                </div>
+                <div class="nav-item" title="GEE Dashboard" data-view="gee">
+                    <i data-lucide="cloud"></i>
+                    <span id="gee-status" class="status-dot"></span>
+                </div>
+                <div class="nav-item" title="Fields" data-view="fields">
+                    <i data-lucide="map-pin"></i>
+                </div>
+                <div class="nav-item" title="Reports" data-view="reports">
+                    <i data-lucide="file-text"></i>
+                </div>
+                <div class="nav-item" title="Settings" data-view="settings">
+                    <i data-lucide="settings"></i>
+                </div>
+            </div>
+            <div class="nav-footer">
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=TB&background=10b981&color=fff" alt="User">
+                </div>
+                <div class="nav-item" title="Logout" onclick="logout()">
+                    <i data-lucide="log-out"></i>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-bar">
+                <div class="search-container">
+                    <i data-lucide="search"></i>
+                    <input type="text" placeholder="Search locations or indices...">
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-secondary"><i data-lucide="bell"></i></button>
+                    <button class="btn btn-primary"><i data-lucide="plus"></i> New Analysis</button>
+                </div>
+            </header>
+
+            <!-- Map & Panels Layout -->
+            <div class="content-body">
+                <div id="map-container">
+                    <div id="map"></div>
+                    <!-- Map Controls Overlay -->
+                    <div class="map-overlay-controls">
+                        <div class="control-group">
+                            <button id="zoom-in" title="Zoom In"><i data-lucide="plus"></i></button>
+                            <button id="center-roi" title="Center on ROI"><i data-lucide="maximize"></i></button>
+                            <button id="zoom-out" title="Zoom Out"><i data-lucide="minus"></i></button>
+                        </div>
+                        <div class="control-group">
+                            <button class="layer-btn active" data-layer="satellite" title="High Resolution (Satellite)">
+                                <i data-lucide="globe"></i>
+                            </button>
+                            <button class="layer-btn" data-layer="topographic" title="Topographic Layer">
+                                <i data-lucide="map"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend Panel -->
+                    <div class="legend-panel">
+                        <h3>AMDI Index</h3>
+                        <div class="legend-gradient"></div>
+                        <div class="legend-labels">
+                            <span>Low</span>
+                            <span>Normal</span>
+                            <span>High</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Banner -->
+                <div id="alert-banner" class="alert-banner" style="display:none;">
+                    <i data-lucide="alert-triangle"></i>
+                    <span id="alert-text">No alerts</span>
+                    <button id="alert-dismiss" class="alert-dismiss"><i data-lucide="x"></i></button>
+                </div>
+
+                <!-- Analysis Sidebar -->
+                <aside class="analysis-panel">
+                    <div class="panel-header">
+                        <h2>Analytics Dashboard</h2>
+                        <p>Deka River Reach - ROI 1</p>
+                    </div>
+
+                    <!-- WQI Gauge -->
+                    <div class="wqi-gauge-section">
+                        <div class="wqi-gauge" id="wqi-gauge">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="gauge-bg" cx="60" cy="60" r="52" />
+                                <circle class="gauge-fill" id="gauge-fill" cx="60" cy="60" r="52" />
+                            </svg>
+                            <div class="gauge-value">
+                                <span id="wqi-value">--</span>
+                                <span class="gauge-label">WQI</span>
+                            </div>
+                        </div>
+                        <div class="wqi-meta">
+                            <span class="wqi-risk" id="wqi-risk">Analyzing...</span>
+                            <span class="wqi-ci" id="wqi-ci">CI: --</span>
+                            <span class="wqi-time" id="wqi-time"></span>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-label">Current Value</span>
+                            <span class="stat-value">0.142</span>
+                            <span class="stat-trend positive"><i data-lucide="trending-up"></i> 4.2%</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Safety Threshold</span>
+                            <span class="stat-value">0.200</span>
+                            <span class="stat-desc">Below limit</span>
+                        </div>
+                    </div>
+
+                    <!-- Model Intelligence -->
+                    <div class="model-intel-section">
+                        <div class="section-header">
+                            <h3><i data-lucide="brain" style="width:14px;height:14px"></i> Model Intelligence</h3>
+                            <span class="layer-count" id="layer-count">0/8 layers</span>
+                        </div>
+                        <div class="model-layers" id="model-layers">
+                            <div class="layer-row" data-layer="physics"><span class="layer-dot"></span><span>Physics Engine</span><span class="layer-wqi" id="l-physics">--</span></div>
+                            <div class="layer-row" data-layer="ml"><span class="layer-dot"></span><span>ML Ensemble</span><span class="layer-wqi" id="l-ml">--</span></div>
+                            <div class="layer-row" data-layer="dl"><span class="layer-dot"></span><span>CNN + LSTM</span><span class="layer-wqi" id="l-dl">--</span></div>
+                            <div class="layer-row" data-layer="ts"><span class="layer-dot"></span><span>Time-Series</span><span class="layer-wqi" id="l-ts">--</span></div>
+                            <div class="layer-row" data-layer="anomaly"><span class="layer-dot"></span><span>Anomaly Detect</span><span class="layer-wqi" id="l-anomaly">--</span></div>
+                            <div class="layer-row" data-layer="bayes"><span class="layer-dot"></span><span>Bayesian Fusion</span><span class="layer-wqi" id="l-bayes">--</span></div>
+                            <div class="layer-row" data-layer="meta"><span class="layer-dot"></span><span>Meta-Learner</span><span class="layer-wqi" id="l-meta">--</span></div>
+                        </div>
+                        <div class="model-agreement" id="model-agreement">
+                            <span>Agreement</span><div class="agreement-bar"><div class="agreement-fill" id="agreement-fill"></div></div><span id="agreement-pct">--%</span>
+                        </div>
+                    </div>
+
+                    <!-- EMA Compliance -->
+                    <div class="ema-section">
+                        <div class="section-header">
+                            <h3><i data-lucide="shield-check" style="width:14px;height:14px"></i> EMA Compliance</h3>
+                            <span class="ema-score" id="ema-score">--%</span>
+                        </div>
+                        <div class="ema-grid" id="ema-grid"></div>
+                    </div>
+
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <h3>Trend Analysis</h3>
+                            <select id="time-range">
+                                <option>Last 30 Days</option>
+                                <option>Last 6 Months</option>
+                                <option>Year to Date</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Forecast -->
+                    <div class="chart-section">
+                        <div class="section-header">
+                            <h3><i data-lucide="trending-up" style="width:14px;height:14px"></i> Forecast</h3>
+                            <select id="forecast-range">
+                                <option value="30">30 Days</option>
+                                <option value="90">Quarterly</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="forecastChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="indices-selector">
+                        <h3>Available Indices</h3>
+                        <div class="index-list">
+                            <button class="index-chip active">AMDI</button>
+                            <button class="index-chip">Salinity</button>
+                            <button class="index-chip">Heavy Metals</button>
+                            <button class="index-chip">Aluminium</button>
+                            <button class="index-chip">NDWI</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Timeline Footer -->
+            <footer class="timeline-footer">
+                <div class="timeline-controls">
+                    <button class="play-btn"><i data-lucide="play"></i></button>
+                    <div class="timeline-slider-container">
+                        <input type="range" min="0" max="100" value="75" class="timeline-slider">
+                        <div class="timeline-ticks">
+                            <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span>
+                        </div>
+                    </div>
+                    <div class="current-date">24 Oct 2024</div>
+                </div>
+            </footer>
+
+            <!-- GEE Dashboard Modal (Hidden by default) -->
+            <div id="gee-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <div class="modal-title">
+                            <i data-lucide="cloud"></i>
+                            <span>Google Earth Engine Dashboard</span>
+                        </div>
+                        <div class="modal-actions">
+                            <button class="modal-btn" id="gee-sync" title="Sync Data">
+                                <i data-lucide="refresh-cw"></i>
+                            </button>
+                            <button class="modal-btn" id="gee-export" title="Export Data">
+                                <i data-lucide="download"></i>
+                            </button>
+                            <button class="modal-btn" id="gee-import" title="Import Data">
+                                <i data-lucide="upload"></i>
+                            </button>
+                            <button class="modal-btn" id="gee-external" title="Open in New Tab">
+                                <i data-lucide="external-link"></i>
+                            </button>
+                            <button class="modal-btn close" id="gee-close" title="Close">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        <iframe 
+                            id="gee-iframe"
+                            src="https://ee-mhandutakunda.projects.earthengine.app/view/deka-indices-dashboard"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            allow="geolocation"
+                            title="GEE Indices Dashboard">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="watershed_data.js"></script>
+    <script src="data.js"></script>
+    <script src="sample-gee-data.js"></script>
+    <script src="historical-data.js"></script>
+    <script src="gee-api.js"></script>
+    <script src="insitu-service.js"></script>
+    <script src="fusion-engine.js"></script>
+    <script src="hybrid-physics.js"></script>
+    <script src="hybrid-ml.js"></script>
+    <script src="hybrid-forecast.js"></script>
+    <script src="hybrid-model.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

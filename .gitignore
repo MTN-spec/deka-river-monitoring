@@ -1,0 +1,38 @@
+# Node / Dependencies
+node_modules/
+npm-debug.log*
+
+# Python Backend
+backend/.venv/
+backend/__pycache__/
+backend/*.pyc
+.env
+GOOGLE_APPLICATION_CREDENTIALS.json
+
+# ArcGIS / GIS Large Files
+*.gdb/
+*.aprx
+*.atbx
+*.lock
+*.kmz
+*.kml
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qmd
+*.lyrx
+.backups/
+Backup from tadiwanashe/
+Deka_Data/
+Final Datasets/
+GpMessages/
+Index/
+Indices_GEE/
+Indices_GEE.zip
+PRISMA/
+
+# System Files
+.DS_Store
+Thumbs.db
