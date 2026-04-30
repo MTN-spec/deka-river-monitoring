@@ -63,7 +63,7 @@ document.getElementById('center-roi').addEventListener('click', () => {
 // ─── POINT ANALYSIS (FULL-STACK INTEGRATION) ───
 let currentMarker = null;
 
-map.on('click', async function(e) {
+map.on('click', async function (e) {
     const lat = e.latlng.lat;
     const lng = e.latlng.lng;
 
@@ -76,7 +76,7 @@ map.on('click', async function(e) {
 
     // Update UI Header
     updatePanelHeader(`Point Analysis: [${lat.toFixed(4)}, ${lng.toFixed(4)}]`);
-    
+
     // Show loading state on WQI Gauge
     const wqiValEl = document.getElementById('wqi-value');
     if (wqiValEl) wqiValEl.innerHTML = '<span style="font-size: 14px">Loading...</span>';
@@ -84,10 +84,10 @@ map.on('click', async function(e) {
     try {
         // Fetch real or simulated GEE data from Python Backend
         console.log(`[App] Fetching GEE data for point ${lat}, ${lng}...`);
-        const response = await fetch(`http://localhost:8000/api/analyze-point?lat=${lat}&lng=${lng}`);
-        
+        const response = await fetch(`https://deka-river-monitoring.onrender.com/`);
+
         if (!response.ok) throw new Error('Backend server error');
-        
+
         const result = await response.json();
         console.log('[App] Received Point Data:', result);
 
@@ -100,7 +100,7 @@ map.on('click', async function(e) {
         }
     } catch (error) {
         console.error('[App] Point Analysis Failed:', error);
-        
+
         // Fallback: If Python backend is not running, show alert but still try to run model
         // with default simulated data so the UI doesn't break
         alert('Backend server not reachable. Please start the Python backend (uvicorn main:app --reload) for point analysis. Falling back to default simulation.');

@@ -6,6 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any
 
+from google.oauth2 import service_account
+
 app = FastAPI(title="Deka River Earth Engine API")
 
 # Allow CORS so the frontend can call this backend
@@ -23,16 +25,27 @@ app.add_middleware(
 def init_ee():
     """
     Initialize Earth Engine.
-    Requires the GOOGLE_APPLICATION_CREDENTIALS environment variable
-    to point to the Service Account JSON key file.
+    Supports standard GOOGLE_APPLICATION_CREDENTIALS file path, or
+    direct parsing of a JSON string via EE_SERVICE_ACCOUNT_JSON (best for Render.com).
     """
     try:
-        # Check if credentials exist
-        if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+        if "EE_SERVICE_ACCOUNT_JSON" in os.environ:
+            print("⏳ Attempting to initialize EE with JSON environment variable...")
+            creds_dict = json.loads(os.environ["EE_SERVICE_ACCOUNT_JSON"])
+            scopes = [
+                'https://www.googleapis.com/auth/earthengine',
+                'https://www.googleapis.com/auth/cloud-platform'
+            ]
+            creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scopes)
+            ee.Initialize(creds)
+            print("✅ Earth Engine initialized successfully using EE_SERVICE_ACCOUNT_JSON.")
+            
+        elif "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
             ee.Initialize()
-            print("✅ Earth Engine initialized using Service Account.")
+            print("✅ Earth Engine initialized using GOOGLE_APPLICATION_CREDENTIALS file.")
+            
         else:
-            print("⚠️ GOOGLE_APPLICATION_CREDENTIALS not set. Attempting default auth...")
+            print("⚠️ No cloud credentials found. Attempting default local auth...")
             # Fallback for local development if authenticated via `earthengine authenticate`
             ee.Initialize()
             print("✅ Earth Engine initialized using local credentials.")
