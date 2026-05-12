@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,12 +9,15 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <!-- Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="auth.js"></script>
     <script>checkAuth();</script>
 </head>
+
 <body class="dark-theme">
     <div class="app-container">
         <!-- Sidebar Navigation -->
@@ -87,7 +91,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <!-- Legend Panel -->
                     <div class="legend-panel">
                         <h3>AMDI Index</h3>
@@ -153,16 +157,28 @@
                             <span class="layer-count" id="layer-count">0/8 layers</span>
                         </div>
                         <div class="model-layers" id="model-layers">
-                            <div class="layer-row" data-layer="physics"><span class="layer-dot"></span><span>Physics Engine</span><span class="layer-wqi" id="l-physics">--</span></div>
-                            <div class="layer-row" data-layer="ml"><span class="layer-dot"></span><span>ML Ensemble</span><span class="layer-wqi" id="l-ml">--</span></div>
-                            <div class="layer-row" data-layer="dl"><span class="layer-dot"></span><span>CNN + LSTM</span><span class="layer-wqi" id="l-dl">--</span></div>
-                            <div class="layer-row" data-layer="ts"><span class="layer-dot"></span><span>Time-Series</span><span class="layer-wqi" id="l-ts">--</span></div>
-                            <div class="layer-row" data-layer="anomaly"><span class="layer-dot"></span><span>Anomaly Detect</span><span class="layer-wqi" id="l-anomaly">--</span></div>
-                            <div class="layer-row" data-layer="bayes"><span class="layer-dot"></span><span>Bayesian Fusion</span><span class="layer-wqi" id="l-bayes">--</span></div>
-                            <div class="layer-row" data-layer="meta"><span class="layer-dot"></span><span>Meta-Learner</span><span class="layer-wqi" id="l-meta">--</span></div>
+                            <div class="layer-row" data-layer="physics"><span class="layer-dot"></span><span>Physics
+                                    Engine</span><span class="layer-wqi" id="l-physics">--</span></div>
+                            <div class="layer-row" data-layer="ml"><span class="layer-dot"></span><span>ML
+                                    Ensemble</span><span class="layer-wqi" id="l-ml">--</span></div>
+                            <div class="layer-row" data-layer="dl"><span class="layer-dot"></span><span>CNN +
+                                    LSTM</span><span class="layer-wqi" id="l-dl">--</span></div>
+                            <div class="layer-row" data-layer="ts"><span
+                                    class="layer-dot"></span><span>Time-Series</span><span class="layer-wqi"
+                                    id="l-ts">--</span></div>
+                            <div class="layer-row" data-layer="anomaly"><span class="layer-dot"></span><span>Anomaly
+                                    Detect</span><span class="layer-wqi" id="l-anomaly">--</span></div>
+                            <div class="layer-row" data-layer="bayes"><span class="layer-dot"></span><span>Bayesian
+                                    Fusion</span><span class="layer-wqi" id="l-bayes">--</span></div>
+                            <div class="layer-row" data-layer="meta"><span
+                                    class="layer-dot"></span><span>Meta-Learner</span><span class="layer-wqi"
+                                    id="l-meta">--</span></div>
                         </div>
                         <div class="model-agreement" id="model-agreement">
-                            <span>Agreement</span><div class="agreement-bar"><div class="agreement-fill" id="agreement-fill"></div></div><span id="agreement-pct">--%</span>
+                            <span>Agreement</span>
+                            <div class="agreement-bar">
+                                <div class="agreement-fill" id="agreement-fill"></div>
+                            </div><span id="agreement-pct">--%</span>
                         </div>
                     </div>
 
@@ -257,13 +273,9 @@
                         </div>
                     </div>
                     <div class="modal-body">
-                        <iframe 
-                            id="gee-iframe"
+                        <iframe id="gee-iframe"
                             src="https://ee-mhandutakunda.projects.earthengine.app/view/deka-indices-dashboard"
-                            width="100%"
-                            height="100%"
-                            frameborder="0"
-                            allow="geolocation"
+                            width="100%" height="100%" frameborder="0" allow="geolocation"
                             title="GEE Indices Dashboard">
                         </iframe>
                     </div>
@@ -292,4 +304,5 @@
         lucide.createIcons();
     </script>
 </body>
+
 </html>
