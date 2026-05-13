@@ -190,7 +190,12 @@ map.on('click', async function (e) {
             const sourceEl = document.getElementById('analysis-source');
             if (sourceEl) {
                 sourceEl.textContent = `Source: ${result.source || 'Earth Engine'}`;
+                sourceEl.title = result.error_msg || ''; // Full error in tooltip
                 sourceEl.style.color = result.source?.includes('Simulation') ? '#ff9800' : '#4caf50';
+                
+                if (result.fallback) {
+                    console.warn('[App] Backend returned fallback data. Reason:', result.error_msg);
+                }
             }
         } else {
             throw new Error(result.error || result.error_msg || 'Failed to extract indices');

@@ -270,7 +270,7 @@ def analyze_point(lat: float, lng: float):
             "fallback": True,
             "error_msg": str(e),
             "coordinates": {"lat": lat, "lng": lng},
-            "source": "Simulation (GEE Auth Pending)",
+            "source": f"Simulation (Error: {str(e)[:30]}...)",
             "indices": mock_indices
         }
 
