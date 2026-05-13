@@ -254,7 +254,15 @@ document.querySelectorAll('.index-chip').forEach(chip => {
             'Salinity': 'salinity',
             'Heavy Metals': 'heavy_metals',
             'Aluminium': 'aluminium',
-            'NDWI': 'ndwi'
+            'NDWI': 'ndwi',
+            'Ferric Iron': 'ferric_iron',
+            'Turbidity': 'turbidity',
+            'Iron Oxide': 'iron_oxide',
+            'Manganese': 'manganese',
+            'AMWI': 'amwi',
+            'Iron Sulfate': 'iron_sulfate',
+            'Red Edge': 'red_edge_stress',
+            'Saturation': 'saturation'
         };
 
         updateUI(indexMap[e.target.textContent]);
