@@ -74,8 +74,9 @@ def get_pixel_indices(lat: float, lng: float) -> Dict[str, float]:
     # Create point geometry
     point = ee.Geometry.Point([lng, lat])
     
-    # Define time window (start with last 30 days, then 180 days)
-    end_date = ee.Date(ee.Date.now())
+    # Define time window (start with current date)
+    import datetime
+    end_date = ee.Date(datetime.datetime.now().strftime('%Y-%m-%d'))
     
     # Try different search windows to find imagery
     s2 = None
