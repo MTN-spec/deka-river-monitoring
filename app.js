@@ -166,11 +166,17 @@ map.on('click', async function (e) {
     if (wqiValEl) wqiValEl.innerHTML = '<span style="font-size: 14px">Loading...</span>';
 
     try {
-        // Fetch real or simulated GEE data from Python Backend
-        console.log(`[App] Fetching GEE data for point ${lat}, ${lng}...`);
-        const response = await fetch(`https://deka-river-monitoring.onrender.com/`);
+        // Determine backend URL based on environment
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000' 
+            : 'https://deka-river-monitoring.onrender.com';
+            
+        console.log(`[App] Fetching GEE data for point ${lat}, ${lng} from ${API_BASE}...`);
+        
+        // Call the specific analysis endpoint with coordinates
+        const response = await fetch(`${API_BASE}/api/analyze-point?lat=${lat}&lng=${lng}`);
 
-        if (!response.ok) throw new Error('Backend server error');
+        if (!response.ok) throw new Error(`Backend server error: ${response.statusText}`);
 
         const result = await response.json();
         console.log('[App] Received Point Data:', result);
@@ -180,14 +186,18 @@ map.on('click', async function (e) {
             const localizedData = { gee: result.indices };
             HybridModel.run(localizedData);
         } else {
-            throw new Error(result.error || 'Failed to extract indices');
+            throw new Error(result.error || result.error_msg || 'Failed to extract indices');
         }
     } catch (error) {
         console.error('[App] Point Analysis Failed:', error);
 
-        // Fallback: If Python backend is not running, show alert but still try to run model
-        // with default simulated data so the UI doesn't break
-        alert('Backend server not reachable. Please start the Python backend (uvicorn main:app --reload) for point analysis. Falling back to default simulation.');
+        // Fallback: Show a more informative alert
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const msg = isLocal 
+            ? 'Backend server not reachable. Please start the Python backend:\n\ncd backend\nuvicorn main:app --reload'
+            : 'Production backend is currently unreachable. Falling back to default simulation.';
+            
+        alert(msg);
         HybridModel.run();
     }
 });

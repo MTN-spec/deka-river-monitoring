@@ -13,7 +13,12 @@ app = FastAPI(title="Deka River Earth Engine API")
 # Allow CORS so the frontend can call this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this in production (e.g., ["https://deka-river.vercel.app"])
+    allow_origins=[
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "https://deka-river-monitoring.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,18 +42,21 @@ def init_ee():
                 'https://www.googleapis.com/auth/cloud-platform'
             ]
             creds = service_account.Credentials.from_service_account_info(creds_dict, scopes=scopes)
-            ee.Initialize(creds)
-            print("✅ Earth Engine initialized successfully using EE_SERVICE_ACCOUNT_JSON.")
+            project = os.environ.get("EE_PROJECT_ID", "deka-river-monitoring")
+            ee.Initialize(creds, project=project)
+            print(f"✅ Earth Engine initialized successfully using EE_SERVICE_ACCOUNT_JSON (Project: {project}).")
             
         elif "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
-            ee.Initialize()
-            print("✅ Earth Engine initialized using GOOGLE_APPLICATION_CREDENTIALS file.")
+            project = os.environ.get("EE_PROJECT_ID", "deka-river-monitoring")
+            ee.Initialize(project=project)
+            print(f"✅ Earth Engine initialized using GOOGLE_APPLICATION_CREDENTIALS file (Project: {project}).")
             
         else:
             print("⚠️ No cloud credentials found. Attempting default local auth...")
             # Fallback for local development if authenticated via `earthengine authenticate`
-            ee.Initialize()
-            print("✅ Earth Engine initialized using local credentials.")
+            project = os.environ.get("EE_PROJECT_ID", "deka-river-monitoring")
+            ee.Initialize(project=project)
+            print(f"✅ Earth Engine initialized using local credentials (Project: {project}).")
     except Exception as e:
         print(f"❌ Failed to initialize Earth Engine: {str(e)}")
 
