@@ -110,19 +110,6 @@ const mockData = {
             ]
         },
         {
-            id: 'iron_oxide',
-            name: 'Iron Oxide Index',
-            description: 'Detects presence of iron oxide minerals.',
-            unit: 'Index Value',
-            threshold: 0.3,
-            currentValue: 0.35,
-            trend: -0.8,
-            palette: ['#fef2f2', '#f87171', '#7f1d1d'],
-            history: [
-                { date: 'Jan', value: 0.38 }, { date: 'Feb', value: 0.37 }, { date: 'Mar', value: 0.36 }, { date: 'Apr', value: 0.35 }, { date: 'May', value: 0.34 }, { date: 'Jun', value: 0.35 }, { date: 'Jul', value: 0.36 }, { date: 'Aug', value: 0.35 }, { date: 'Sep', value: 0.35 }, { date: 'Oct', value: 0.35 }
-            ]
-        },
-        {
             id: 'manganese',
             name: 'Manganese Stress Index',
             description: 'Monitors vegetation stress caused by manganese concentration.',

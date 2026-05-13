@@ -45,6 +45,18 @@ const watershedLayer = L.geoJSON(watershedGeoJSON, {
 // Fit map to watershed bounds
 map.fitBounds(watershedLayer.getBounds());
 
+// --- River Data Integration ---
+const riverLayer = L.geoJSON(riverGeoJSON, {
+    style: {
+        color: "#3b82f6",
+        weight: 5,
+        opacity: 0.9
+    },
+    onEachFeature: (feature, layer) => {
+        layer.bindTooltip(feature.properties.name || "Deka River Path", { sticky: true });
+    }
+}).addTo(map);
+
 // --- Mines Data Integration ---
 const mineIcon = L.divIcon({
     className: 'mine-marker',
@@ -103,6 +115,17 @@ document.getElementById('toggle-mines').addEventListener('click', (e) => {
         minesLayer.addTo(map);
         e.currentTarget.classList.add('active');
         lucide.createIcons(); // Ensure icon in markers is rendered
+    }
+});
+
+// River Toggle Listener
+document.getElementById('toggle-river').addEventListener('click', (e) => {
+    if (map.hasLayer(riverLayer)) {
+        map.removeLayer(riverLayer);
+        e.currentTarget.classList.remove('active');
+    } else {
+        riverLayer.addTo(map);
+        e.currentTarget.classList.add('active');
     }
 });
 
@@ -257,7 +280,6 @@ document.querySelectorAll('.index-chip').forEach(chip => {
             'NDWI': 'ndwi',
             'Ferric Iron': 'ferric_iron',
             'Turbidity': 'turbidity',
-            'Iron Oxide': 'iron_oxide',
             'Manganese': 'manganese',
             'AMWI': 'amwi',
             'Iron Sulfate': 'iron_sulfate',

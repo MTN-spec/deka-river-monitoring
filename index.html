@@ -89,8 +89,11 @@
                             <button class="layer-btn" data-layer="topographic" title="Topographic Layer">
                                 <i data-lucide="map"></i>
                             </button>
-                            <button id="toggle-mines" title="Toggle Mines Data" class="toggle-btn">
+                            <button id="toggle-mines" title="Toggle Mines Data" class="toggle-btn active">
                                 <i data-lucide="pickaxe"></i>
+                            </button>
+                            <button id="toggle-river" title="Toggle River Path" class="toggle-btn active">
+                                <i data-lucide="waves"></i>
                             </button>
                         </div>
                     </div>
@@ -232,7 +235,6 @@
                             <button class="index-chip">NDWI</button>
                             <button class="index-chip">Ferric Iron</button>
                             <button class="index-chip">Turbidity</button>
-                            <button class="index-chip">Iron Oxide</button>
                             <button class="index-chip">Manganese</button>
                             <button class="index-chip">AMWI</button>
                             <button class="index-chip">Iron Sulfate</button>
@@ -303,6 +305,7 @@
     <script src="sample-gee-data.js"></script>
     <script src="historical-data.js"></script>
     <script src="mines_data.js"></script>
+    <script src="river_data.js"></script>
     <script src="gee-api.js"></script>
     <script src="insitu-service.js"></script>
     <script src="fusion-engine.js"></script>
