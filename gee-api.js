@@ -11,7 +11,7 @@
 // GEE Configuration
 const GEE_CONFIG = {
     // GEE App URL
-    appUrl: 'https://ee-mhandutakunda.projects.earthengine.app/view/deka-indices-dashboard',
+    appUrl: 'https://deka-amd.projects.earthengine.app/view/deka-river-amd-monitoring',
     
     // Local storage key for GEE data cache
     cacheKey: 'deka_gee_data',

@@ -236,7 +236,7 @@ document.getElementById('gee-close')?.addEventListener('click', () => {
 });
 
 document.getElementById('gee-external')?.addEventListener('click', () => {
-    window.open('https://ee-mhandutakunda.projects.earthengine.app/view/deka-indices-dashboard', '_blank');
+    window.open('https://deka-amd.projects.earthengine.app/view/deka-river-amd-monitoring', '_blank');
 });
 
 document.getElementById('gee-refresh')?.addEventListener('click', () => {
