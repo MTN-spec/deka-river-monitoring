@@ -801,6 +801,89 @@ body {
     border-radius: 3px; transition: width 1s ease-out;
 }
 
+/* ═══ MINE MARKERS & POPUPS ═══ */
+.mine-marker {
+    background: none;
+    border: none;
+}
+
+.mine-dot {
+    width: 30px;
+    height: 30px;
+    background: #000;
+    border: 2px solid #fbbf24;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fbbf24;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    transition: transform 0.2s;
+}
+
+.mine-dot i {
+    width: 16px;
+    height: 16px;
+}
+
+.mine-dot:hover {
+    transform: scale(1.2);
+    z-index: 1000;
+}
+
+.mine-popup {
+    padding: 8px;
+    min-width: 200px;
+}
+
+.mine-popup h3 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #161e2d;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 8px;
+}
+
+.mine-attr {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: #475569;
+}
+
+.mine-attr span:first-child {
+    font-weight: 600;
+    color: #64748b;
+}
+
+.status-active { color: #10b981; font-weight: 700; }
+.status-abandoned { color: #ef4444; font-weight: 700; }
+.status-operational { color: #3b82f6; font-weight: 700; }
+
+.btn-analyze {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-analyze:hover {
+    background: #059669;
+}
+
+.toggle-btn.active {
+    background: #fbbf24 !sync;
+    color: #000;
+}
+
 /* ═══ EMA COMPLIANCE ═══ */
 .ema-section { }
 .ema-score { font-size: 13px; font-weight: 700; color: var(--primary); }

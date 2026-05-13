@@ -45,6 +45,67 @@ const watershedLayer = L.geoJSON(watershedGeoJSON, {
 // Fit map to watershed bounds
 map.fitBounds(watershedLayer.getBounds());
 
+// --- Mines Data Integration ---
+const mineIcon = L.divIcon({
+    className: 'mine-marker',
+    html: '<div class="mine-dot"><i data-lucide="pickaxe"></i></div>',
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+});
+
+const minesLayer = L.geoJSON(minesGeoJSON, {
+    pointToLayer: (feature, latlng) => {
+        return L.marker(latlng, { icon: mineIcon });
+    },
+    onEachFeature: (feature, layer) => {
+        const props = feature.properties;
+        const popupContent = `
+            <div class="mine-popup">
+                <h3>${props.name}</h3>
+                <div class="mine-attr">
+                    <span>Type:</span> <span>${props.type}</span>
+                </div>
+                <div class="mine-attr">
+                    <span>Status:</span> <span class="status-${props.status.toLowerCase()}">${props.status}</span>
+                </div>
+                <div class="mine-attr">
+                    <span>Minerals:</span> <span>${props.minerals}</span>
+                </div>
+                <div class="mine-attr">
+                    <span>Tonnage:</span> <span>${props.tonnage}</span>
+                </div>
+                <div class="mine-attr">
+                    <span>Started:</span> <span>${props.start_year}</span>
+                </div>
+                <button class="btn-analyze" onclick="analyzeMine('${props.name}', ${feature.geometry.coordinates[1]}, ${feature.geometry.coordinates[0]})">
+                    Analyze Impact
+                </button>
+            </div>
+        `;
+        layer.bindPopup(popupContent);
+    }
+}).addTo(map);
+
+// Global function for mine analysis (can be called from popup)
+window.analyzeMine = (name, lat, lng) => {
+    updatePanelHeader(`Mine Analysis: ${name}`);
+    map.setView([lat, lng], 15);
+    // Trigger the same analysis as clicking on the map
+    map.fire('click', { latlng: L.latLng(lat, lng) });
+};
+
+// Mines Toggle Listener
+document.getElementById('toggle-mines').addEventListener('click', (e) => {
+    if (map.hasLayer(minesLayer)) {
+        map.removeLayer(minesLayer);
+        e.currentTarget.classList.remove('active');
+    } else {
+        minesLayer.addTo(map);
+        e.currentTarget.classList.add('active');
+        lucide.createIcons(); // Ensure icon in markers is rendered
+    }
+});
+
 // Layer Toggle Listeners
 document.querySelectorAll('.layer-btn').forEach(btn => {
     btn.addEventListener('click', () => {
