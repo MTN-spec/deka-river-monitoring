@@ -185,19 +185,26 @@ map.on('click', async function (e) {
             // Re-run the Hybrid Model with this localized data
             const localizedData = { gee: result.indices };
             HybridModel.run(localizedData);
+
+            // Update source info in UI
+            const sourceEl = document.getElementById('analysis-source');
+            if (sourceEl) {
+                sourceEl.textContent = `Source: ${result.source || 'Earth Engine'}`;
+                sourceEl.style.color = result.source?.includes('Simulation') ? '#ff9800' : '#4caf50';
+            }
         } else {
             throw new Error(result.error || result.error_msg || 'Failed to extract indices');
         }
     } catch (error) {
         console.error('[App] Point Analysis Failed:', error);
 
-        // Fallback: Show a more informative alert
-        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const msg = isLocal 
-            ? 'Backend server not reachable. Please start the Python backend:\n\ncd backend\nuvicorn main:app --reload'
-            : 'Production backend is currently unreachable. Falling back to default simulation.';
+        // Show fallback status
+        const sourceEl = document.getElementById('analysis-source');
+        if (sourceEl) {
+            sourceEl.textContent = 'Source: Simulation Fallback';
+            sourceEl.style.color = '#f44336';
+        }
             
-        alert(msg);
         HybridModel.run();
     }
 });

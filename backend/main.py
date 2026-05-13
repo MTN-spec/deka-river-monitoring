@@ -74,30 +74,34 @@ def get_pixel_indices(lat: float, lng: float) -> Dict[str, float]:
     # Create point geometry
     point = ee.Geometry.Point([lng, lat])
     
-    # Define time window (last 30 days)
+    # Define time window (start with last 30 days, then 180 days)
     end_date = ee.Date(ee.Date.now())
-    start_date = end_date.advance(-30, 'day')
     
-    # Load Sentinel-2 Surface Reflectance
-    s2 = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
-          .filterBounds(point)
-          .filterDate(start_date, end_date)
-          .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20)))
-    
-    # If no recent images, widen the search to 90 days
-    if s2.size().getInfo() == 0:
-        start_date = end_date.advance(-90, 'day')
-        s2 = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
+    # Try different search windows to find imagery
+    s2 = None
+    windows = [30, 90, 180, 365]
+    for days in windows:
+        start_date = end_date.advance(-days, 'day')
+        collection = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
               .filterBounds(point)
               .filterDate(start_date, end_date)
               .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30)))
+        
+        if collection.size().getInfo() > 0:
+            s2 = collection
+            print(f"📡 Found {collection.size().getInfo()} images in {days}-day window.")
+            break
+            
+    if not s2:
+        raise ValueError("No valid Sentinel-2 imagery found for this location even in a 1-year window.")
     
     # Get the median image to reduce cloud noise
     image = s2.median()
     
-    # Check if we got an image
-    if not image.bandNames().getInfo():
-        raise ValueError("No valid Sentinel-2 imagery found for this location.")
+    # Check if we got an image with bands
+    band_names = image.bandNames().getInfo()
+    if not band_names:
+        raise ValueError("Image collection exists but median image has no bands (masking issue).")
     
     # --- INDICES CALCULATION ---
     # 1. NDVI (Normalized Difference Vegetation Index)
@@ -106,33 +110,63 @@ def get_pixel_indices(lat: float, lng: float) -> Dict[str, float]:
     # 2. NDWI (Normalized Difference Water Index)
     ndwi = image.normalizedDifference(['B3', 'B8']).rename('NDWI')
     
-    # 3. AMDI (Acid Mine Drainage Index - custom simplified formulation)
-    # Using band ratios common for detecting iron oxides/hydroxides
-    amdi = image.expression(
-        '(B4 - B2) / (B4 + B2)', 
-        {'B4': image.select('B4'), 'B2': image.select('B2')}
-    ).rename('AMDI')
+    # 3. AMDI (Acid Mine Drainage Index)
+    amdi = image.expression('(B4 - B2) / (B4 + B2)', {'B4': image.select('B4'), 'B2': image.select('B2')}).rename('AMDI')
     
-    # 4. Iron Oxide (Ferric Oxide)
-    iron_oxide = image.expression(
-        'B4 / B2', 
-        {'B4': image.select('B4'), 'B2': image.select('B2')}
-    ).rename('IronOxide')
+    # 4. Iron Oxide
+    iron_oxide = image.expression('B4 / B2', {'B4': image.select('B4'), 'B2': image.select('B2')}).rename('IronOxide')
     
-    # 5. Heavy Metals Proxy (Vegetation stress + mineral alterations)
-    heavy_metals = image.expression(
-        '(B11 / B8) * (B4 / B3)',
-        {'B11': image.select('B11'), 'B8': image.select('B8'), 'B4': image.select('B4'), 'B3': image.select('B3')}
-    ).rename('HeavyMetals')
+    # 5. Heavy Metals Proxy
+    heavy_metals = image.expression('(B11 / B8) * (B4 / B3)', {
+        'B11': image.select('B11'), 'B8': image.select('B8'), 
+        'B4': image.select('B4'), 'B3': image.select('B3')
+    }).rename('HeavyMetals')
     
-    # 6. Aluminium Proxy (Clay/Alunite alteration)
-    aluminium = image.expression(
-        'B11 / B12',
-        {'B11': image.select('B11'), 'B12': image.select('B12')}
-    ).rename('Aluminium')
+    # 6. Aluminium Proxy
+    aluminium = image.expression('B11 / B12', {'B11': image.select('B11'), 'B12': image.select('B12')}).rename('Aluminium')
+    
+    # 7. Salinity (NDSI)
+    salinity = image.normalizedDifference(['B11', 'B12']).rename('Salinity')
+    
+    # 8. Ferric Ratio
+    ferric_ratio = image.expression('B4 / B3', {'B4': image.select('B4'), 'B3': image.select('B3')}).rename('FerricRatio')
+    
+    # 9. Iron Sulfate
+    iron_sulfate = image.expression('B11 / B2', {'B11': image.select('B11'), 'B2': image.select('B2')}).rename('IronSulfate')
+    
+    # 10. Manganese Stress
+    manganese = image.normalizedDifference(['B8', 'B1']).rename('Manganese')
+    
+    # 11. NDSI (Snow/Salt)
+    ndsi = image.normalizedDifference(['B3', 'B11']).rename('NDSI')
+    
+    # 12. MNDWI (Modified NDWI)
+    mndwi = image.normalizedDifference(['B3', 'B11']).rename('MNDWI')
+    
+    # 13. NDTI (Turbidity)
+    ndti = image.normalizedDifference(['B4', 'B3']).rename('NDTI')
+    
+    # 14. Saturation Index
+    saturation = image.normalizedDifference(['B8', 'B2']).rename('Saturation')
+    
+    # 15. Red Edge Stress
+    red_edge = image.normalizedDifference(['B8A', 'B7']).rename('RedEdge')
+    
+    # 16. ND Stress Sensitivity
+    stress_sens = image.normalizedDifference(['B8', 'B12']).rename('StressSens')
+    
+    # 17. AMD Detection (Multi-band combination)
+    amd_detect = image.expression(
+        '((B4 - B2) / (B4 + B2)) * 0.5 + (B11 / B12) * 0.5', 
+        {'B4': image.select('B4'), 'B2': image.select('B2'), 'B11': image.select('B11'), 'B12': image.select('B12')}
+    ).rename('AMDDetect')
 
-    # Add all calculated indices as bands to the image
-    combined = image.addBands([ndvi, ndwi, amdi, iron_oxide, heavy_metals, aluminium])
+    # Add all calculated indices as bands
+    combined = image.addBands([
+        ndvi, ndwi, amdi, iron_oxide, heavy_metals, aluminium, 
+        salinity, ferric_ratio, iron_sulfate, manganese, 
+        ndsi, mndwi, ndti, saturation, red_edge, stress_sens, amd_detect
+    ])
     
     # Extract values at the point
     reduced = combined.reduceRegion(
@@ -142,27 +176,34 @@ def get_pixel_indices(lat: float, lng: float) -> Dict[str, float]:
         maxPixels=1e9
     ).getInfo()
     
-    # Build the 18-index payload (filling missing advanced indices with proxies/defaults)
-    # In a full production script, you would calculate all 18 explicitly.
+    if not reduced:
+        raise ValueError("GEE returned no data for this point (possibly cloud masked).")
+    
+    # Helper to safely extract value and handle None
+    def val(key, default):
+        v = reduced.get(key)
+        return v if v is not None else default
+
+    # Build the 18-index payload
     results = {
-        "ndvi": reduced.get("NDVI", 0.5),
-        "ndwi": reduced.get("NDWI", 0.4),
-        "amdi": reduced.get("AMDI", 0.1),
-        "salinity": 2.5, # Placeholder (needs specific Sentinel-1/2 complex math)
-        "heavyMetals": reduced.get("HeavyMetals", 0.25),
-        "aluminium": reduced.get("Aluminium", 0.06),
-        "ironOxide": reduced.get("IronOxide", 0.3),
-        "ferricRatio": reduced.get("IronOxide", 0.3) * 1.2, # Derived proxy
-        "ironSulfate": reduced.get("AMDI", 0.1) * 1.5,     # Derived proxy
-        "manganeseStress": 0.15,
-        "ndsi": 0.1,
-        "mndwi": reduced.get("NDWI", 0.4) * 0.9,
-        "ndti": 0.2,
-        "saturationIndex": 0.5,
-        "redEdgeStress": 0.2,
-        "ndStressSensitivity": 0.3,
-        "lst": 28.0, # Needs Landsat 8/9 Thermal band (placeholder for Sentinel-2 only script)
-        "amdDetection": reduced.get("AMDI", 0.1) * 0.8 + reduced.get("IronOxide", 0.3) * 0.2
+        "ndvi": val("NDVI", 0.5),
+        "ndwi": val("NDWI", 0.4),
+        "amdi": val("AMDI", 0.1),
+        "salinity": val("Salinity", 0.1) * 10, # Scaled for dashboard
+        "heavyMetals": val("HeavyMetals", 0.25),
+        "aluminium": val("Aluminium", 0.06),
+        "ironOxide": val("IronOxide", 0.3),
+        "ferricRatio": val("FerricRatio", 0.4),
+        "ironSulfate": val("IronSulfate", 0.15),
+        "manganeseStress": val("Manganese", 0.15),
+        "ndsi": val("NDSI", 0.1),
+        "mndwi": val("MNDWI", 0.4),
+        "ndti": val("NDTI", 0.2),
+        "saturationIndex": val("Saturation", 0.5),
+        "redEdgeStress": val("RedEdge", 0.2),
+        "ndStressSensitivity": val("StressSens", 0.3),
+        "lst": 28.0, # Placeholder (needs thermal bands)
+        "amdDetection": val("AMDDetect", 0.15)
     }
     
     return results
