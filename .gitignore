@@ -8,6 +8,7 @@ backend/__pycache__/
 backend/*.pyc
 .env
 GOOGLE_APPLICATION_CREDENTIALS.json
+deka-river-monitoring-*.json
 
 # ArcGIS / GIS Large Files
 *.gdb/

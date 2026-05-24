@@ -167,12 +167,12 @@ map.on('click', async function (e) {
 
     try {
         // Determine backend URL based on environment
-        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://localhost:8000' 
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
             : 'https://deka-river-monitoring.onrender.com';
-            
+
         console.log(`[App] Fetching GEE data for point ${lat}, ${lng} from ${API_BASE}...`);
-        
+
         // Call the specific analysis endpoint with coordinates
         const response = await fetch(`${API_BASE}/api/analyze-point?lat=${lat}&lng=${lng}`);
 
@@ -192,7 +192,7 @@ map.on('click', async function (e) {
                 sourceEl.textContent = `Source: ${result.source || 'Earth Engine'}`;
                 sourceEl.title = result.error_msg || ''; // Full error in tooltip
                 sourceEl.style.color = result.source?.includes('Simulation') ? '#ff9800' : '#4caf50';
-                
+
                 if (result.fallback) {
                     console.warn('[App] Backend returned fallback data. Reason:', result.error_msg);
                 }
@@ -209,7 +209,7 @@ map.on('click', async function (e) {
             sourceEl.textContent = 'Source: Simulation Fallback';
             sourceEl.style.color = '#f44336';
         }
-            
+
         HybridModel.run();
     }
 });
@@ -332,12 +332,23 @@ document.querySelectorAll('.nav-item').forEach(item => {
         document.getElementById('map-container').style.display = 'none';
         document.querySelector('.analysis-panel').style.display = 'none';
         document.querySelector('.timeline-footer').style.display = 'none';
+        const seasonalView = document.getElementById('seasonal-analysis-view');
+        if (seasonalView) {
+            seasonalView.style.display = 'none';
+        }
 
         // Show selected view
         if (view === 'dashboard') {
             document.getElementById('map-container').style.display = 'flex';
             document.querySelector('.analysis-panel').style.display = 'flex';
             document.querySelector('.timeline-footer').style.display = 'flex';
+        } else if (view === 'reports') {
+            if (seasonalView) {
+                seasonalView.style.display = 'flex';
+            }
+            if (typeof SeasonalModule !== 'undefined') {
+                SeasonalModule.init();
+            }
         }
         // Add other views as needed
     });

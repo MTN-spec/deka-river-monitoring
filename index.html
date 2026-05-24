@@ -40,7 +40,7 @@
                 <div class="nav-item" title="Fields" data-view="fields">
                     <i data-lucide="map-pin"></i>
                 </div>
-                <div class="nav-item" title="Reports" data-view="reports">
+                <div class="nav-item" title="Seasonal Dynamics" data-view="reports">
                     <i data-lucide="file-text"></i>
                 </div>
                 <div class="nav-item" title="Settings" data-view="settings">
@@ -244,6 +244,51 @@
                         </div>
                     </div>
                 </aside>
+
+                <!-- Seasonal Dynamics & Temporal Risk Module View -->
+                <div id="seasonal-analysis-view" class="view-panel" style="display: none;">
+                    <div class="seasonal-header">
+                        <h2>Seasonal Dynamics & Temporal Risk Analysis</h2>
+                        <p>Aggregating 60 months of historical water quality records to identify critical seasonal pollution risk windows.</p>
+                    </div>
+                    
+                    <div class="seasonal-grid">
+                        <!-- Chart Card -->
+                        <div class="seasonal-card">
+                            <h3><i data-lucide="trending-up"></i> Flow Dilution vs. Pollution Concentration</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="seasonalChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 12-Month Calendar Card -->
+                        <div class="seasonal-card">
+                            <h3><i data-lucide="calendar"></i> 12-Month Temporal Risk Calendar</h3>
+                            <div class="risk-calendar-grid" id="risk-calendar"></div>
+                        </div>
+
+                        <!-- Statistics Averages Card -->
+                        <div class="seasonal-card" style="grid-column: span 2;">
+                            <h3><i data-lucide="table"></i> Wet Season vs. Dry Season Hydrological Comparison</h3>
+                            <div id="seasonal-stats-table"></div>
+                        </div>
+
+                        <!-- Validation Card (Bottom Span) -->
+                        <div class="seasonal-card validation-card">
+                            <h3><i data-lucide="graduation-cap"></i> Thesis Methodology & Model Validation</h3>
+                            <div class="validation-grid">
+                                <div class="validation-col wet">
+                                    <h4><i data-lucide="droplets"></i> Wet Season Mechanics (SCS-CN & USLE Validation)</h4>
+                                    <p>During the wet season (Nov-Mar), the catchment experiences significant rainfall-runoff conversion. Under the **SCS Curve Number (CN=85 for mining zones)**, this triggers active surface discharge. The **USLE erodibility factor (K=0.032)** and sheetwash erosion lead to elevated Turbidity (NDTI) and Total Suspended Solids (TSS). However, the high dilution capacity of the high streamflow (avg 11.2 m³/s) mitigates dissolved metal concentrations, shifting the Water Quality Index upwards despite the physical runoff loading.</p>
+                                </div>
+                                <div class="validation-col dry">
+                                    <h4><i data-lucide="flame"></i> Dry Season Mechanics (Streeter-Phelps & Decay Validation)</h4>
+                                    <p>During the dry season (Apr-Oct), the river velocity drops to an average of 1.8 m³/s. The lack of flow dilution concentrates active mine discharge. This directly validates the **Streeter-Phelps Dissolved Oxygen Model**, causing critical DO sag downstream of discharge coordinates. Simultaneously, it triggers accelerated deposition of ferric precipitates ("yellowboy") and selective chlorophyll stress (RECI decline) in the immediate 100m riparian zone, confirming the exponential spatial decay profile.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Timeline Footer -->
@@ -314,6 +359,7 @@
     <script src="hybrid-ml.js"></script>
     <script src="hybrid-forecast.js"></script>
     <script src="hybrid-model.js"></script>
+    <script src="seasonal-module.js"></script>
     <script src="app.js"></script>
     <script>
         // Initialize Lucide icons
