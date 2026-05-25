@@ -186,6 +186,11 @@ map.on('click', async function (e) {
             const localizedData = { gee: result.indices };
             HybridModel.run(localizedData);
 
+            // Sync with Seasonal Dynamics Module in real-time
+            if (typeof SeasonalModule !== 'undefined') {
+                SeasonalModule.updateForCoordinate(lat, lng, result.indices);
+            }
+
             // Update source info in UI
             const sourceEl = document.getElementById('analysis-source');
             if (sourceEl) {
@@ -665,4 +670,20 @@ document.addEventListener('DOMContentLoaded', () => {
             (results.forecast?.daily30 || []);
         if (data.length > 0) renderForecastChart(data);
     });
+
+    // Top Search Bar Interactivity Link
+    const searchInput = document.getElementById('dashboard-search');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value;
+                if (typeof SeasonalModule !== 'undefined') {
+                    const handled = SeasonalModule.handleSearch(query);
+                    if (!handled) {
+                        alert(`No direct location match found for: "${query}". Try "Hwange", "Makomo", "Control", or a lat,lng coordinate.`);
+                    }
+                }
+            }
+        });
+    }
 });

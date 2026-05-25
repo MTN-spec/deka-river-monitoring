@@ -63,7 +63,7 @@
             <header class="top-bar">
                 <div class="search-container">
                     <i data-lucide="search"></i>
-                    <input type="text" placeholder="Search locations or indices...">
+                    <input type="text" id="dashboard-search" placeholder="Search locations (Hwange, Makomo, lat,lng)...">
                 </div>
                 <div class="action-buttons">
                     <button class="btn btn-secondary"><i data-lucide="bell"></i></button>
@@ -247,9 +247,18 @@
 
                 <!-- Seasonal Dynamics & Temporal Risk Module View -->
                 <div id="seasonal-analysis-view" class="view-panel" style="display: none;">
-                    <div class="seasonal-header">
-                        <h2>Seasonal Dynamics & Temporal Risk Analysis</h2>
-                        <p>Aggregating 60 months of historical water quality records to identify critical seasonal pollution risk windows.</p>
+                    <div class="seasonal-header-container">
+                        <div class="seasonal-header">
+                            <h2>Seasonal Dynamics & Temporal Risk Analysis</h2>
+                            <p>Aggregating 60 months of historical water quality records to identify critical seasonal pollution risk windows.</p>
+                        </div>
+                        <select id="seasonal-location-profile">
+                            <option value="baseline">Deka Baseline (Catchment Averages)</option>
+                            <option value="hwange">Hwange Mining Concession (Highest AMD)</option>
+                            <option value="makomo">Makomo Resources (Highest Turbidity/Runoff)</option>
+                            <option value="control">Upland Control Group (Stable Background)</option>
+                            <option value="clicked" disabled>Map Clicked Coordinate (No click yet)</option>
+                        </select>
                     </div>
                     
                     <div class="seasonal-grid">
@@ -337,6 +346,26 @@
                             width="100%" height="100%" frameborder="0" allow="geolocation"
                             title="GEE Indices Dashboard">
                         </iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seasonal Deep-Dive Analysis Modal (Hidden by default) -->
+            <div id="seasonal-deepdive-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-container deepdive-size">
+                    <div class="modal-header" style="background: var(--bg-sidebar);">
+                        <div class="modal-title">
+                            <i data-lucide="graduation-cap"></i>
+                            <span id="deepdive-title">November Deep-Dive Analysis</span>
+                        </div>
+                        <div class="modal-actions">
+                            <button class="modal-btn close" id="deepdive-close" title="Close">
+                                <i data-lucide="x"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="deepdive-body" id="deepdive-body-content">
+                        <!-- Content generated dynamically in seasonal-module.js -->
                     </div>
                 </div>
             </div>
