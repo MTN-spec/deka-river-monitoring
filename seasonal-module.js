@@ -620,7 +620,7 @@ const SeasonalModule = {
                 }
             }
         });
-    }
+    },
 
     /**
      * Renders a highly professional environmental physics modeling modal
